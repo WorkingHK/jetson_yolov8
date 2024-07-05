@@ -8,7 +8,8 @@ cap = cv2.VideoCapture(0)
 
 model = YOLO("yolomodel/ust_model.pt")
 tolerance=0.1
-
+font = cv2.FONT_HERSHEY_PLAIN
+textcolour = (0, 255, 0)
 
 while True:
     ret , frame = cap.read()
@@ -35,8 +36,8 @@ while True:
     classes = np.array(result.boxes.cls.cpu(), dtype="int")
     
     #draw center lines
-    cv2.line(frame, (frame_center_x, 0), (frame_center_x, height), (0, 255, 0), 2)
-    cv2.line(frame, (0, frame_center_y), (width, frame_center_y), (0, 255, 0), 2)
+    cv2.line(frame, (frame_center_x, 0), (frame_center_x, height), textcolour, 2)
+    cv2.line(frame, (0, frame_center_y), (width, frame_center_y), textcolour, 2)
 
     for cls, bbox in zip(classes, bboxes):
         (x, y, x2, y2) = bbox
@@ -49,27 +50,28 @@ while True:
        
         # Draw bounding box and class label
         cv2.rectangle(frame, (x, y), (x2, y2), (0, 0, 255), 2)
-        cv2.putText(frame, str(cls), (x, y - 5), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+        cv2.putText(frame, str(cls), (x, y - 5), font, 2, (0, 0, 255), 2)
         
         # Display the normalized center coordinates
-        cv2.putText(frame, f"({norm_x:.2f}, {norm_y:.2f})", (object_center_x, object_center_y - 10), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+        cv2.putText(frame, f"({norm_x:.2f}, {norm_y:.2f})", (object_center_x, object_center_y - 10), font, 2, textcolour, 2)
 
     # Determine the movement direction based on normalized deviations
         if abs(norm_x) < tolerance and abs(norm_y) < tolerance:
-            direction = "Stop"
+            direction = "Stop and grab"
         elif abs(norm_x) > abs(norm_y):
             direction = "Move Left" if norm_x >= tolerance else "Move Right"
         else:
             direction = "Move Forward" if norm_y >= tolerance else "Move Backward"
 
         # Display the direction on the frame
-        cv2.putText(frame, direction, (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-            
+        cv2.putText(frame, direction, (object_center_x, object_center_y + 20), font, 2, textcolour, 2)
+        cv2.putText(frame, direction, (int(width/2) + 10, height-8), font, 2, textcolour, 2)
+           
         
         # if tolerance_x1 <= object_center_x <= tolerance_x2 and tolerance_y1 <= object_center_y <= tolerance_y2:
-        #     cv2.putText(frame, "In Zone", (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+        #     cv2.putText(frame, "In Zone", (object_center_x, object_center_y + 20), font, 2, textcolour, 2)
         # else:
-        #     cv2.putText(frame, "Out of Zone", (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+        #     cv2.putText(frame, "Out of Zone", (object_center_x, object_center_y + 20), font, 2, (0, 0, 255), 2)
 
     cv2.imshow("Detection", frame)
     key = cv2.waitKey(1)
