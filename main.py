@@ -31,6 +31,11 @@ def draw_center_lines(frame, width, height):
     cv2.line(frame, (frame_center_x, 0), (frame_center_x, height), TEXT_COLOUR, 2)
     cv2.line(frame, (0, frame_center_y), (width, frame_center_y), TEXT_COLOUR, 2)
 
+def draw_top_bot_rectangle(frame,width,height):
+        cv2.rectangle(frame, (0,height-30), (width, height), (0,0,0), -1)
+        cv2.rectangle(frame, (0,0), (width, 30), (0,0,0), -1)
+    
+
 # Function to normalize the coordinates of the object's center
 def normalize_coordinates(object_center, frame_center):
     return (object_center - frame_center) / (frame_center if frame_center != 0 else 1)
@@ -59,7 +64,7 @@ def process_frame(frame, model, width, height):
     # Draw tolerance zone and center lines
     draw_tolerance_zone(frame, width, height)
     draw_center_lines(frame, width, height)
-    
+    draw_top_bot_rectangle(frame,width,height)   
     # Process each detected object
     for cls, bbox in zip(classes, bboxes):
         x, y, x2, y2 = bbox
