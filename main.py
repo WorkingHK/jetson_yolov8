@@ -6,7 +6,7 @@ import torch
 cap = cv2.VideoCapture(0)
 
 
-model = YOLO("yolomodel/best.pt")
+model = YOLO("yolomodel/ust_model.pt")
 tolerance=0.1
 
 
@@ -54,11 +54,22 @@ while True:
         # Display the normalized center coordinates
         cv2.putText(frame, f"({norm_x:.2f}, {norm_y:.2f})", (object_center_x, object_center_y - 10), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
 
-        # Check if the object's center is within the tolerance zone
-        if tolerance_x1 <= object_center_x <= tolerance_x2 and tolerance_y1 <= object_center_y <= tolerance_y2:
-            cv2.putText(frame, "In Zone", (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+    # Determine the movement direction based on normalized deviations
+        if abs(norm_x) < tolerance and abs(norm_y) < tolerance:
+            direction = "Stop"
+        elif abs(norm_x) > abs(norm_y):
+            direction = "Move Left" if norm_x >= tolerance else "Move Right"
         else:
-            cv2.putText(frame, "Out of Zone", (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+            direction = "Move Forward" if norm_y >= tolerance else "Move Backward"
+
+        # Display the direction on the frame
+        cv2.putText(frame, direction, (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+            
+        
+        # if tolerance_x1 <= object_center_x <= tolerance_x2 and tolerance_y1 <= object_center_y <= tolerance_y2:
+        #     cv2.putText(frame, "In Zone", (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+        # else:
+        #     cv2.putText(frame, "Out of Zone", (object_center_x, object_center_y + 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
 
     cv2.imshow("Detection", frame)
     key = cv2.waitKey(1)
